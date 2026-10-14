@@ -1,0 +1,14 @@
+{
+  "domain": "raise3d",
+  "name": "Raise3D",
+  "codeowners": [
+    "@pymaillet"
+  ],
+  "config_flow": true,
+  "documentation": "https://dev.edris.fr/anjou-image/ha-raise3d",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://dev.edris.fr/anjou-image/ha-raise3d/-/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

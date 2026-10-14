@@ -1,0 +1,138 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Imprimante Raise3D (r3monitor)",
+        "description": "r3monitor doit tourner sur l'imprimante (voir printer/r3monitor.py dans le dépôt).",
+        "data": {
+          "host": "Hôte",
+          "port": "Port",
+          "name": "Nom"
+        },
+        "data_description": {
+          "host": "Adresse IP ou nom d'hôte de l'imprimante.",
+          "port": "Port HTTP de r3monitor (8090 par défaut)."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Impossible de joindre r3monitor. Vérifiez l'adresse et que r3monitor tourne sur l'imprimante.",
+      "not_r3monitor": "Le serveur répond mais ne ressemble pas à r3monitor (pas d'état dans /status).",
+      "unknown": "Erreur inattendue."
+    },
+    "abort": {
+      "already_configured": "Cette imprimante est déjà configurée."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options Raise3D",
+        "data": {
+          "scan_interval": "Intervalle d'interrogation (secondes)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "printing": {
+        "name": "Impression en cours"
+      },
+      "klipper": {
+        "name": "Klipper"
+      },
+      "filament": {
+        "name": "Filament {name}"
+      }
+    },
+    "camera": {
+      "camera": {
+        "name": "Caméra"
+      }
+    },
+    "sensor": {
+      "state": {
+        "name": "État",
+        "state": {
+          "standby": "En attente",
+          "printing": "Impression",
+          "paused": "En pause",
+          "complete": "Terminée",
+          "cancelled": "Annulée",
+          "error": "Erreur",
+          "starting": "Démarrage",
+          "klipper_unreachable": "Klipper injoignable"
+        }
+      },
+      "idle_state": {
+        "name": "Activité",
+        "state": {
+          "idle": "Inactive",
+          "printing": "Impression",
+          "ready": "Prête"
+        }
+      },
+      "message": {
+        "name": "Message"
+      },
+      "filename": {
+        "name": "Fichier"
+      },
+      "progress": {
+        "name": "Progression"
+      },
+      "print_duration": {
+        "name": "Temps d'impression"
+      },
+      "total_duration": {
+        "name": "Temps total"
+      },
+      "remaining_time": {
+        "name": "Temps restant"
+      },
+      "estimated_end": {
+        "name": "Fin estimée"
+      },
+      "filament_used": {
+        "name": "Filament utilisé"
+      },
+      "fan": {
+        "name": "Ventilateur"
+      },
+      "sysload": {
+        "name": "Charge système"
+      },
+      "last_update": {
+        "name": "Dernière mise à jour"
+      },
+      "left_nozzle_temperature": {
+        "name": "Température buse gauche"
+      },
+      "left_nozzle_target": {
+        "name": "Consigne buse gauche"
+      },
+      "left_nozzle_power": {
+        "name": "Puissance chauffe buse gauche"
+      },
+      "right_nozzle_temperature": {
+        "name": "Température buse droite"
+      },
+      "right_nozzle_target": {
+        "name": "Consigne buse droite"
+      },
+      "right_nozzle_power": {
+        "name": "Puissance chauffe buse droite"
+      },
+      "bed_temperature": {
+        "name": "Température plateau"
+      },
+      "bed_target": {
+        "name": "Consigne plateau"
+      },
+      "bed_power": {
+        "name": "Puissance chauffe plateau"
+      }
+    }
+  }
+}

@@ -1,93 +1,89 @@
 # HA-Raise3D
 
+Intégration [Home Assistant](https://www.home-assistant.io/) (installable via [HACS](https://hacs.xyz/)) pour suivre une **Raise3D Pro2 Hyper Speed (Klipper)**, en **lecture seule**.
 
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+L'ancienne Remote Access API de Raise3D n'est plus disponible. L'intégration s'appuie à la place sur **r3monitor** ([printer/r3monitor.py](printer/r3monitor.py)), un petit serveur qui tourne sur l'imprimante :
 
 ```
-cd existing_repo
-git remote add origin https://dev.edris.fr/anjou-image/ha-raise3d.git
-git branch -M main
-git push -uf origin main
+Klipper (/tmp/klippy_uds) ─┐
+                           ├─> r3monitor (HTTP :8090) ──> Home Assistant
+MXCCameraServer (:30216) ──┘     /status  /raw  /snapshot.jpg
 ```
 
-## Integrate with your tools
+Aucune commande G-code n'est envoyée : ni r3monitor ni l'intégration ne peuvent agir sur l'imprimante.
 
-* [Set up project integrations](https://dev.edris.fr/anjou-image/ha-raise3d/-/settings/integrations)
+## Entités
 
-## Collaborate with your team
+| Type | Entités |
+|------|---------|
+| Capteurs | État (en attente, impression, pause, terminée, annulée, erreur, Klipper injoignable), message Klipper, fichier, progression, temps d'impression, temps total, temps restant, fin estimée, filament utilisé, ventilateur |
+| Températures | Buse gauche, buse droite et plateau : température, consigne, puissance de chauffe |
+| Capteurs binaires | Impression en cours, connexion Klipper, détection de filament (F0, F1) |
+| Caméra | Image fixe de la caméra de l'imprimante |
+| Diagnostic | Activité (idle_timeout), charge système, dernière mise à jour |
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+Les buses, le plateau et les détecteurs de filament sont ajoutés automatiquement dès que r3monitor les remonte. Si Klipper redémarre, les capteurs passent « indisponible » et la connexion Klipper passe à « off », puis tout revient seul.
 
-## Test and Deploy
+Les **diagnostics** téléchargeables depuis l'intégration contiennent la réponse `/status` et les objets Klipper bruts (`/raw`).
 
-Use the built-in continuous integration in GitLab.
+## 1. Installer r3monitor sur l'imprimante
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+r3monitor n'utilise que la bibliothèque standard Python (2.7 ou 3.x). Copiez-le sur l'imprimante puis lancez-le :
 
-***
+```bash
+scp printer/r3monitor.py <utilisateur>@<ip-imprimante>:
+ssh <utilisateur>@<ip-imprimante> 'nohup python r3monitor.py >/tmp/r3monitor.log 2>&1 &'
+```
 
-# Editing this README
+Pour qu'il survive à un redémarrage, ajoutez ce lancement au mécanisme de démarrage de l'imprimante.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+Vérifiez ensuite depuis le réseau de Home Assistant que `http://<ip-imprimante>:8090/status` renvoie du JSON. Le tableau de bord intégré est sur `http://<ip-imprimante>:8090/`.
 
-## Suggestions for a good README
+> r3monitor écoute sur `0.0.0.0` sans authentification. Toute machine du réseau local peut donc lire l'état **et l'image de la caméra**. Gardez l'imprimante sur un réseau de confiance.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## 2. Installer l'intégration
 
-## Name
-Choose a self-explaining name for your project.
+### Via HACS (dépôt personnalisé)
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+> HACS n'accepte que les dépôts **GitHub**. Publiez (ou mettez en miroir) ce dépôt sur GitHub, puis :
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+1. HACS → menu ⋮ → **Dépôts personnalisés**.
+2. URL du dépôt GitHub, catégorie **Integration**.
+3. Installez **Raise3D**, puis redémarrez Home Assistant.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+### Manuelle
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Copiez `custom_components/raise3d` dans `config/custom_components/` de Home Assistant, puis redémarrez.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## 3. Configurer
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+**Paramètres → Appareils et services → Ajouter une intégration → Raise3D**, puis renseignez :
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+- **Hôte** : IP de l'imprimante
+- **Port** : `8090`
+- **Nom** : nom de l'appareil (« Raise3D Pro2 » par défaut)
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+L'intervalle d'interrogation (10 s par défaut, de 2 à 300 s) se règle via **Configurer**. r3monitor lit Klipper toutes les 2 s, donc descendre sous 2 s n'apporte rien.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+## Alternative MQTT
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+r3monitor publie aussi `/status` toutes les 10 s sur le topic `raise3d/pro2/status` (retain), si `mosquitto_pub` est présent sur l'imprimante. Le broker par défaut est `127.0.0.1` (`MQTT_HOST` dans le script). Cette intégration n'utilise pas MQTT : elle interroge directement l'API HTTP.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## Dépannage
 
-## License
-For open source projects, say how it is licensed.
+```yaml
+logger:
+  logs:
+    custom_components.raise3d: debug
+```
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- `curl http://<ip-imprimante>:8090/status` : résumé vu par Home Assistant.
+- `curl http://<ip-imprimante>:8090/raw` : objets Klipper bruts.
+- `/tmp/r3monitor.log` sur l'imprimante : erreurs de lecture Klipper ou caméra.
+
+## Développement
+
+```bash
+uv venv && uv pip install pytest-homeassistant-custom-component PyTurboJPEG
+.venv/bin/pytest
+```

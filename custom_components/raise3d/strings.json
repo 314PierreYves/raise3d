@@ -1,0 +1,138 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Raise3D printer (r3monitor)",
+        "description": "r3monitor must be running on the printer (see printer/r3monitor.py in the repository).",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "name": "Name"
+        },
+        "data_description": {
+          "host": "IP address or hostname of the printer.",
+          "port": "r3monitor HTTP port (8090 by default)."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to reach r3monitor. Check the address and that r3monitor is running on the printer.",
+      "not_r3monitor": "The server answered but does not look like r3monitor (no state in /status).",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This printer is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Raise3D options",
+        "data": {
+          "scan_interval": "Polling interval (seconds)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "printing": {
+        "name": "Printing"
+      },
+      "klipper": {
+        "name": "Klipper"
+      },
+      "filament": {
+        "name": "Filament {name}"
+      }
+    },
+    "camera": {
+      "camera": {
+        "name": "Camera"
+      }
+    },
+    "sensor": {
+      "state": {
+        "name": "Status",
+        "state": {
+          "standby": "Standby",
+          "printing": "Printing",
+          "paused": "Paused",
+          "complete": "Complete",
+          "cancelled": "Cancelled",
+          "error": "Error",
+          "starting": "Starting",
+          "klipper_unreachable": "Klipper unreachable"
+        }
+      },
+      "idle_state": {
+        "name": "Activity",
+        "state": {
+          "idle": "Idle",
+          "printing": "Printing",
+          "ready": "Ready"
+        }
+      },
+      "message": {
+        "name": "Message"
+      },
+      "filename": {
+        "name": "File"
+      },
+      "progress": {
+        "name": "Progress"
+      },
+      "print_duration": {
+        "name": "Print time"
+      },
+      "total_duration": {
+        "name": "Total time"
+      },
+      "remaining_time": {
+        "name": "Remaining time"
+      },
+      "estimated_end": {
+        "name": "Estimated end"
+      },
+      "filament_used": {
+        "name": "Filament used"
+      },
+      "fan": {
+        "name": "Fan speed"
+      },
+      "sysload": {
+        "name": "System load"
+      },
+      "last_update": {
+        "name": "Last update"
+      },
+      "left_nozzle_temperature": {
+        "name": "Left nozzle temperature"
+      },
+      "left_nozzle_target": {
+        "name": "Left nozzle target"
+      },
+      "left_nozzle_power": {
+        "name": "Left nozzle heater power"
+      },
+      "right_nozzle_temperature": {
+        "name": "Right nozzle temperature"
+      },
+      "right_nozzle_target": {
+        "name": "Right nozzle target"
+      },
+      "right_nozzle_power": {
+        "name": "Right nozzle heater power"
+      },
+      "bed_temperature": {
+        "name": "Bed temperature"
+      },
+      "bed_target": {
+        "name": "Bed target"
+      },
+      "bed_power": {
+        "name": "Bed heater power"
+      }
+    }
+  }
+}
